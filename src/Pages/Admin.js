@@ -21,10 +21,10 @@ const incrementQuestion = ({step = 1, min = 1, max = 5, setToasts}) => {
       questionNumber += step;
 
       if (questionNumber < min) {
-        setToasts({ text: "asdfasd" });
+        setToasts({ text: "You can't go backwards any more!" });
         questionNumber = min
       } else if (questionNumber > max) {
-        setToasts({ text: "asfsdaf" });
+        setToasts({ text: "You can't go forwards any more!" });
         questionNumber = max;
       }
 
@@ -83,6 +83,7 @@ const Admin = () => {
   const [numUsers, setNumUsers] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [toasts, setToasts] = useToasts();
+  const [game, setGame] = useState({});
   useEffect(() => {
     // grab # of users
     firebase
@@ -91,6 +92,14 @@ const Admin = () => {
       .on("value", (snapshot) => {
         if (snapshot.val()) {
           setNumUsers(Object.keys(snapshot.val()).length);
+        }
+      });
+    firebase
+      .database()
+      .ref("game")
+      .on("value", (snapshot) => {
+        if (snapshot.val()) {
+          setGame(snapshot.val());
         }
       });
   }, []);
@@ -104,6 +113,9 @@ const Admin = () => {
         <div className="admin-quickstats">
           <Stat stat="+89" label="Societal Score" />
           <Stat stat="$3004" label="Average Cash" />
+          <Stat 
+            stat={{ "question": game.activeQuestion }[game.status] || "-"} 
+            label={{ "question": "Active Question", "waiting": "Waiting for Game to Start", "gameEnded": "Game Ended" }[game.status]} />
         </div>
         <div className="admin-quiz-buttons">
           <ButtonGroup>
