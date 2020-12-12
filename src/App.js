@@ -3,13 +3,17 @@ import {
   CssBaseline,
   GeistProvider,
   Loading,
-  Text
+  Text,
+  Note,
 } from "@geist-ui/react";
 import firebase from "firebase";
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import { useEffect, useState } from "react";
 import Quiz from "./Pages/Quiz";
 import "./App.css";
-import { setUser } from "./utils/auth";
+import { isAdmin, setUser } from "./utils/auth";
+import PrivateRoute from "./Components/PrivateRoute";
+import Admin from "./Pages/Admin";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDN_i9crnVUhgOak4rGRCpAkrFtfWHWJh0",
@@ -34,7 +38,7 @@ function App() {
 
   useEffect(() => {
     gameRef.on("value", (snapshot) => {
-      console.log(snapshot.val());
+      // console.log(snapshot.val());
       setGameStatus(snapshot.val().status || "waiting");
       setQuestionID(snapshot.val().activeQuestion);
       setLoading(false);
@@ -48,14 +52,30 @@ function App() {
   });
 
   const authenticate = () => {
-    setIsSigningIn(true)
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
-      firebase.auth().signInWithPopup(AuthProvider).then(res => {
-        firebase.database().ref(`/users/${res.user.email.split("@")[0]}`).set({score: 0, cash: 1000});
-        setUser(res.user)
+    setIsSigningIn(true);
+    firebase
+      .auth()
+      .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => {
+        firebase
+          .auth()
+          .signInWithPopup(AuthProvider)
+          .then((res) => {
+            firebase
+              .database()
+              .ref(`/users/${res.user.email.split("@")[0]}`)
+              .transaction((user) => {
+                if (user === null) {
+                  return { score: 0, cash: 1000 };
+                } else {
+                  console.log("User already exists")
+                  return;
+                }
+              });
+            setUser(res.user);
+          });
       });
-    });
-  }
+  };
 
   useEffect(() => {
     const unregisterAuthObserver = firebase
@@ -70,14 +90,18 @@ function App() {
     return (
       <GeistProvider theme={{ type: "dark" }}>
         <CssBaseline />
-        <Button
-          type="secondary"
-          ghost
-          loading={isSigningIn}
-          onClick={authenticate}
-        >
-          Login
-        </Button>
+        <div className="App">
+          <Text h2>Please Login to Play <Text i>The Invisible Hand</Text></Text>
+          <Note style={{ width: "fit-content", marginBottom: "24px" }}>You will need to use your PDSB.net account</Note>
+          <Button
+            type="secondary"
+            ghost
+            loading={isSigningIn}
+            onClick={authenticate}
+          >
+            Login
+          </Button>
+        </div>
       </GeistProvider>
     );
   }
@@ -86,18 +110,26 @@ function App() {
     <GeistProvider theme={{ type: "dark" }}>
       <CssBaseline />
       <div className="App">
-        {console.log(gameStatus)}
-        {loading ? (
-          <Loading />
-        ) : (
-          {
-            /* todo: redirect to waiting if user has answered question already */
-            waiting: <Text h2> Waiting for game to start...</Text>,
-            question: <Quiz questionID={questionID} />,
-            gameEnded: <Text h2>Game Ended</Text>,
-            nextQuestion: <Text h2>Waiting for the next question...</Text>
-          }[gameStatus] || <Text h1>Something went wrong</Text>
-        )}
+        <Router>
+          <Switch>
+          <Route path="/" exact>
+          {console.log(gameStatus)}
+            {loading ? (
+              <Loading />
+            ) : (
+              {
+                /* todo: redirect to waiting if user has answered question already */
+                waiting: <Text h2> Waiting for game to start...</Text>,
+                question: <Quiz questionID={questionID} />,
+                gameEnded: <Text h2>Game Ended</Text>,
+                nextQuestion: <Text h2>Waiting for the next question...</Text>,
+              }[gameStatus] || <Text h1>Something went wrong</Text>
+            )}
+          </Route>
+          <PrivateRoute authed={isAdmin()} path="/admin" component={Admin} />
+          </Switch>
+        </Router>
+        
       </div>
     </GeistProvider>
   );

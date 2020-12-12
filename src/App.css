@@ -12,8 +12,20 @@
   width: fit-content !important;
 }
 
-.quiz-container {
+.App {
   padding: 2em 3em;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.loading {
+  font-size: 24px;
+  font-weight: 500;
+  min-height: 84vh;
+}
+
+.loading > label {
+  color: white !important;
 }
 
 .quiz-header {
@@ -26,6 +38,23 @@
 
 .question-breadcrumb {
   text-transform: capitalize;
+}
+
+.admin-quickstats {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 64px;
+}
+
+.admin-dot-indicator {
+  margin-left: 8px;
+  margin-right: 16px;
+  vertical-align: middle;
+}
+
+.admin-dot-indicator > .icon {
+  background-color: #21FD82 !important;
 }
 
 @media only screen and (max-width: 720px) {
@@ -41,7 +70,7 @@
     margin-bottom: 12px !important;
   }
 
-  .quiz-container {
+  .App {
     padding: 2em 1.5em;
   }
 }

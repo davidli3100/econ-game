@@ -20,8 +20,9 @@ const Quiz = ({ questionID, setGameStatus }) => {
   const [submitting, setSubmitting] = useState(false);
   const [submittingOption, setSubmittingOption] = useState("");
   const [waiting, setWaiting] = useState(false);
+  const [submittingError, setSubmittingError] = useState(false)
 
-  const submitAnswer = (answerID) => {
+  const submitAnswer = (answerID, cash, score) => {
     // set ui states
     setSubmittingOption(answerID);
     setSubmitting(true);
@@ -30,18 +31,12 @@ const Quiz = ({ questionID, setGameStatus }) => {
     // refer to the questions/questionID/answers/answerID/count - increment value
     firebase
       .database()
-      .ref(`/questions/${questionID}/answers/${answerID}/`)
+      .ref(`/answers/${questionID}/${answerID}`)
       .transaction((answer) => {
-        if (answer) {
-          if (answer.count) {
-            answer.count++;
-          } else {
-            answer.count = 0;
-          }
-        }
-        return answer;
+        return answer + 1;
       })
       .catch((err) => {
+        setSubmittingError(true)
         setSubmitting(false);
         setSubmittingOption(null);
         console.error(err);
@@ -58,6 +53,7 @@ const Quiz = ({ questionID, setGameStatus }) => {
       )
       .set(answerID)
       .catch((err) => {
+        setSubmittingError(true)
         setToasts({ text: "Something went wrong, try again. "})
         setSubmitting(false);
         setSubmittingOption(null);
@@ -67,9 +63,20 @@ const Quiz = ({ questionID, setGameStatus }) => {
       .database()
       .ref(`/users/${firebase.auth().currentUser.email.split("@")[0]}`)
       .transaction((user) => {
+        if (user && !isNaN(user.score) && !isNaN(user.cash)) {
+          // who tf at google thought running the function before the data loaded was a good idea
+
+          // console.log("foo");
+          console.log(user);
+          // let score = user.score
+
+          user.score = user.score + (score || 0);
+          user.cash = user.cash + (cash || 0);
+        }
         return user;
       })
       .catch((err) => {
+        setSubmittingError(true)
         setToasts({ text: "Something went wrong, try again. "})
         setSubmitting(false);
         setSubmittingOption(null);
@@ -77,10 +84,13 @@ const Quiz = ({ questionID, setGameStatus }) => {
       });
 
     setSubmittingOption("")
-    setToasts({ text: "Your answer was submitted" });
+    if (!submittingError) {
+      setToasts({ text: "Your answer was submitted" });
+    }
     setTimeout(() => {
       // navigate
-    }, 3000);
+      setWaiting(true);
+    }, 1500);
   };
 
   useEffect(() => {
@@ -88,15 +98,20 @@ const Quiz = ({ questionID, setGameStatus }) => {
       .database()
       .ref(`/questions/${questionID}`)
       .once("value", (snapshot) => {
-        console.log(snapshot.val());
         setQuestion(snapshot.val());
         setAnswerIDs(Object.keys(snapshot.val().answers));
         setLoading(false);
       });
   }, [questionID]);
-  console.log(question);
+
+  if (waiting) {
+    return (
+      <Loading className="loading" size="large">Waiting for everyone else to catch up</Loading>
+    )
+  }
+
   return (
-    <div className="quiz-container">
+    <div>
       <div className="quiz-header">
         <Breadcrumbs className="quiz-breadcrumbs">
           <Breadcrumbs.Item href="#">The Invisible Hand</Breadcrumbs.Item>
@@ -119,7 +134,9 @@ const Quiz = ({ questionID, setGameStatus }) => {
                   loading={submittingOption === answerID}
                   disabled={submitting}
                   key={answerID}
-                  onClick={() => submitAnswer(answerID)}
+                  size="large"
+                  auto
+                  onClick={() => submitAnswer(answerID, question.answers[answerID].cash, question.answers[answerID].score)}
                 >
                   {question.answers[answerID].title}
                 </Button>

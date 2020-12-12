@@ -1,6 +1,17 @@
 {
   "rules": {
-    ".read": "now < 1610254800000",  // 2021-1-10
-    ".write": "now < 1610254800000",  // 2021-1-10
+    "answers": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+    },
+    "questions": {
+      ".read": "auth != null",
+    },
+    "users": {
+      "$stdNum": {
+        ".read": "auth != null && auth.token.email.contains($stdNum)",
+        ".write": "auth != null && auth.token.email.contains($stdNum)",
+      }
+    }
   }
 }
