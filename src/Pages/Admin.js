@@ -131,12 +131,11 @@ const startGame = (setModalOpen) => {
 const Admin = () => {
   const [users, setUsers] = useState([]);
   const [numUsers, setNumUsers] = useState(0);
-  const [questions, setQuestions] = useState({});
   const [activeAnswer, setActiveAnswer] = useState("q1");
   const [answers, setAnswers] = useState({});
   const [stats, setStats] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
-  const [toasts, setToasts] = useToasts();
+  const [, setToasts] = useToasts();
   const [game, setGame] = useState({});
   useEffect(() => {
     // grab # of users
@@ -169,7 +168,7 @@ const Admin = () => {
       .ref("questions")
       .once("value", (snapshot) => {
         let questions = snapshot.val();
-        setQuestions(snapshot.val());
+        // setQuestions(snapshot.val());
         firebase
           .database()
           .ref("answers")
