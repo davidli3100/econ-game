@@ -24,7 +24,7 @@ export const setUser = async (user) => {
     window.localStorage.setItem('user', JSON.stringify(user));
     if (user.email) {
       try {
-        const res = await firebase.database().ref(`/admins/${user.email.split('@')[0]}`).once('value');
+        const res = await firebase.database().ref(`/admins/${user.uid}`).once('value');
         console.log(res.val())
         window.localStorage.setItem('isAdmin', res.val());
       } catch (err) {

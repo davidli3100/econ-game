@@ -16,11 +16,10 @@ const Quiz = ({ questionID, setGameStatus }) => {
   const [toasts, setToasts] = useToasts();
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(true);
-  const [answerIDs, setAnswerIDs] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [submittingOption, setSubmittingOption] = useState("");
   const [waiting, setWaiting] = useState(false);
-  const [submittingError, setSubmittingError] = useState(false)
+  const [submittingError, setSubmittingError] = useState(false);
 
   const submitAnswer = (answerID, cash, score) => {
     // set ui states
@@ -36,7 +35,33 @@ const Quiz = ({ questionID, setGameStatus }) => {
         return answer + 1;
       })
       .catch((err) => {
-        setSubmittingError(true)
+        setSubmittingError(true);
+        setSubmitting(false);
+        setSubmittingOption(null);
+        console.error(err);
+      });
+
+    firebase
+      .database()
+      .ref(`/answers/score`)
+      .transaction((globalScore) => {
+        return globalScore + (score || 0);
+      })
+      .catch((err) => {
+        setSubmittingError(true);
+        setSubmitting(false);
+        setSubmittingOption(null);
+        console.error(err);
+      });
+
+    firebase
+      .database()
+      .ref(`/answers/cash`)
+      .transaction((globalCash) => {
+        return globalCash + (cash || 0);
+      })
+      .catch((err) => {
+        setSubmittingError(true);
         setSubmitting(false);
         setSubmittingOption(null);
         console.error(err);
@@ -44,6 +69,7 @@ const Quiz = ({ questionID, setGameStatus }) => {
 
     // store to user db
     // users/student#/questions/questionID/ - push full answer
+    // This code is shit and @jhthenerd should feel bad. Too Bad!
     firebase
       .database()
       .ref(
@@ -51,39 +77,44 @@ const Quiz = ({ questionID, setGameStatus }) => {
           firebase.auth().currentUser.email.split("@")[0]
         }/questions/${questionID}`
       )
-      .set(answerID)
+      .transaction(() => {
+        return answerID;
+      })
       .catch((err) => {
-        setSubmittingError(true)
-        setToasts({ text: "Something went wrong, try again. "})
+        setSubmittingError(true);
+        setToasts({ text: "Something went wrong, try again. " });
         setSubmitting(false);
         setSubmittingOption(null);
         console.error(err);
       });
     firebase
       .database()
-      .ref(`/users/${firebase.auth().currentUser.email.split("@")[0]}`)
-      .transaction((user) => {
-        if (user && !isNaN(user.score) && !isNaN(user.cash)) {
-          // who tf at google thought running the function before the data loaded was a good idea
-
-          // console.log("foo");
-          console.log(user);
-          // let score = user.score
-
-          user.score = user.score + (score || 0);
-          user.cash = user.cash + (cash || 0);
-        }
-        return user;
+      .ref(`/users/${firebase.auth().currentUser.email.split("@")[0]}/cash`)
+      .transaction((userCash) => {
+        return userCash + (cash || 0);
       })
       .catch((err) => {
-        setSubmittingError(true)
-        setToasts({ text: "Something went wrong, try again. "})
+        setSubmittingError(true);
+        setToasts({ text: "Something went wrong, try again. " });
+        setSubmitting(false);
+        setSubmittingOption(null);
+        console.error(err);
+      });
+    firebase
+      .database()
+      .ref(`/users/${firebase.auth().currentUser.email.split("@")[0]}/score`)
+      .transaction((scoreCash) => {
+        return scoreCash + (score || 0);
+      })
+      .catch((err) => {
+        setSubmittingError(true);
+        setToasts({ text: "Something went wrong, try again. " });
         setSubmitting(false);
         setSubmittingOption(null);
         console.error(err);
       });
 
-    setSubmittingOption("")
+    setSubmittingOption("");
     if (!submittingError) {
       setToasts({ text: "Your answer was submitted" });
     }
@@ -98,16 +129,23 @@ const Quiz = ({ questionID, setGameStatus }) => {
       .database()
       .ref(`/questions/${questionID}`)
       .once("value", (snapshot) => {
-        setQuestion(snapshot.val());
-        setAnswerIDs(Object.keys(snapshot.val().answers));
+        console.log(snapshot.val().answers)
+        const question = snapshot.val()
+        setQuestion(question);
+        setWaiting(false);
+        setSubmitting(false);
+        setSubmittingOption("");
+        setSubmittingError(false);
         setLoading(false);
       });
   }, [questionID]);
 
   if (waiting) {
     return (
-      <Loading className="loading" size="large">Waiting for everyone else to catch up</Loading>
-    )
+      <Loading className="loading" size="large">
+        Waiting for everyone else to catch up
+      </Loading>
+    );
   }
 
   return (
@@ -129,14 +167,20 @@ const Quiz = ({ questionID, setGameStatus }) => {
           <>
             <Text h3>{question.title}</Text>
             <div className="button-grid">
-              {answerIDs.map((answerID) => (
+              {Object.keys(question.answers).map((answerID) => (
                 <Button
                   loading={submittingOption === answerID}
                   disabled={submitting}
                   key={answerID}
                   size="large"
-                  auto
-                  onClick={() => submitAnswer(answerID, question.answers[answerID].cash, question.answers[answerID].score)}
+                  className="quiz-button"
+                  onClick={() =>
+                    submitAnswer(
+                      answerID,
+                      question.answers[answerID].cash,
+                      question.answers[answerID].score
+                    )
+                  }
                 >
                   {question.answers[answerID].title}
                 </Button>

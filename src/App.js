@@ -39,8 +39,8 @@ function App() {
   useEffect(() => {
     gameRef.on("value", (snapshot) => {
       // console.log(snapshot.val());
-      setGameStatus(snapshot.val().status || "waiting");
       setQuestionID(snapshot.val().activeQuestion);
+      setGameStatus(snapshot.val().status || "waiting");
       setLoading(false);
     });
   }, [gameRef]);
@@ -61,17 +61,6 @@ function App() {
           .auth()
           .signInWithPopup(AuthProvider)
           .then((res) => {
-            firebase
-              .database()
-              .ref(`/users/${res.user.email.split("@")[0]}`)
-              .transaction((user) => {
-                if (user === null) {
-                  return { score: 0, cash: 1000 };
-                } else {
-                  console.log("User already exists")
-                  return;
-                }
-              });
             setUser(res.user);
           });
       });
@@ -122,7 +111,6 @@ function App() {
                 waiting: <Text h2> Waiting for game to start...</Text>,
                 question: <Quiz questionID={questionID} />,
                 gameEnded: <Text h2>Game Ended</Text>,
-                nextQuestion: <Text h2>Waiting for the next question...</Text>,
               }[gameStatus] || <Text h1>Something went wrong</Text>
             )}
           </Route>
