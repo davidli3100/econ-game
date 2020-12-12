@@ -82,7 +82,7 @@ const startGame = (setModalOpen) => {
 const Admin = () => {
   const [numUsers, setNumUsers] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-  const [toasts, setToasts] = useToasts();
+  const [, setToasts] = useToasts();
   const [game, setGame] = useState({});
   useEffect(() => {
     // grab # of users

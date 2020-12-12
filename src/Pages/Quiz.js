@@ -8,12 +8,12 @@ import {
   Text,
   useToasts,
 } from "@geist-ui/react";
-import { getUser, logout } from "../utils/auth";
+// import { getUser, logout } from "../utils/auth";
 import UserButton from "../Components/UserButton";
 
 const Quiz = ({ questionID, setGameStatus }) => {
   console.log(questionID);
-  const [toasts, setToasts] = useToasts();
+  const [, setToasts] = useToasts();
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
