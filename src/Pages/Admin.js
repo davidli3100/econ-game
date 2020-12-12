@@ -29,7 +29,7 @@ const incrementAnswers = ({
   setToasts,
   setAnswer,
 }) => {
-  let questionNumber = currentAnswer;
+  let questionNumber = parseInt(currentAnswer[1]);
   questionNumber += step;
 
   if (questionNumber < min) {
@@ -40,7 +40,7 @@ const incrementAnswers = ({
     questionNumber = max;
   }
 
-  setAnswer(questionNumber);
+  setAnswer('q' + questionNumber);
 };
 
 const incrementQuestion = ({ step = 1, min = 1, max = 5, setToasts }) => {
@@ -132,7 +132,7 @@ const Admin = () => {
   const [users, setUsers] = useState([]);
   const [numUsers, setNumUsers] = useState(0);
   const [questions, setQuestions] = useState({});
-  const [activeAnswer, setActiveAnswer] = useState(0);
+  const [activeAnswer, setActiveAnswer] = useState("q1");
   const [answers, setAnswers] = useState({});
   const [stats, setStats] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
@@ -176,23 +176,27 @@ const Admin = () => {
           .on("value", (snapshot2) => {
             // setAnswers(snapshot2.val());
             let tempAnswers = snapshot2.val();
-            const answers = [];
-            Object.keys(tempAnswers).forEach((questionID) => {
-              if (questionID !== "cash" && questionID !== "score") {
-                const answer = [];
-                console.log(questionID);
-                Object.keys(tempAnswers[questionID]).forEach((answerID) => {
-                  console.log(answerID);
-                  answer.push({
-                    answer: questions[questionID].answers[answerID].title,
-                    count: tempAnswers[questionID][answerID],
+            const answers = {};
+            if (tempAnswers) {
+              Object.keys(tempAnswers).forEach((questionID) => {
+                if (questionID !== "cash" && questionID !== "score") {
+                  const answer = [];
+                  console.log(questionID);
+                  Object.keys(tempAnswers[questionID]).forEach((answerID) => {
+                    console.log(answerID);
+                    answer.push({
+                      answer: questions[questionID].answers[answerID].title,
+                      count: tempAnswers[questionID][answerID],
+                    });
                   });
-                });
-                answers.push(answer);
-              }
-            });
-            setAnswers(answers);
-            setStats(tempAnswers);
+                  answers[questionID] = answer;
+                }
+              });
+              setAnswers(answers);
+              setStats(tempAnswers); 
+            } else {
+              setStats({score: 0, cash: 0})
+            }
           });
       });
 
@@ -242,24 +246,16 @@ const Admin = () => {
           </ButtonGroup>
         </div>
         <div className="admin-table">
-          <Text h3>Users</Text>
-          <Table hover emptyText="0" data={users}>
-            <Table.Column prop="user" label="User" />
-            <Table.Column prop="cash" label="Cash" />
-            <Table.Column prop="score" label="Score" />
-          </Table>
-        </div>
-        <div className="admin-table">
           <div className="questions-table-title">
-            <Text h3>Q{activeAnswer + 1}</Text>
+            <Text style={{ textTransform: "capitalize" }} h3>{activeAnswer}</Text>
             <ButtonGroup className="questions-table-title-buttons" size="mini">
               <Button
                 onClick={() =>
                   incrementAnswers({
                     step: -1,
                     currentAnswer: activeAnswer,
-                    max: answers.length,
-                    min: 0,
+                    max: Object.keys(answers).length,
+                    min: 1,
                     setToasts: setToasts,
                     setAnswer: setActiveAnswer,
                   })
@@ -270,8 +266,8 @@ const Admin = () => {
                 onClick={() =>
                   incrementAnswers({
                     currentAnswer: activeAnswer,
-                    max: answers.length-1,
-                    min: 0,
+                    max: Object.keys(answers).length,
+                    min: 1,
                     setToasts: setToasts,
                     setAnswer: setActiveAnswer,
                   })
@@ -283,6 +279,14 @@ const Admin = () => {
           <Table hover emptyText="0" data={answers[activeAnswer]}>
             <Table.Column prop="answer" label="Option" />
             <Table.Column prop="count" label="Answers" />
+          </Table>
+        </div>
+        <div className="admin-table">
+          <Text h3>Users</Text>
+          <Table hover emptyText="0" data={users}>
+            <Table.Column prop="user" label="User" />
+            <Table.Column prop="cash" label="Cash" />
+            <Table.Column prop="score" label="Score" />
           </Table>
         </div>
       </div>
