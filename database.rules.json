@@ -2,15 +2,15 @@
   "rules": {
     "answers": {
       ".read": "auth != null",
-      ".write": "auth != null",
+      ".write": "auth != null"
     },
     "questions": {
-      ".read": "auth != null",
+      ".read": "auth != null"
     },
     "users": {
       "$stdNum": {
         ".read": "auth != null && auth.token.email.contains($stdNum)",
-        ".write": "auth != null && auth.token.email.contains($stdNum)",
+        ".write": "auth != null && auth.token.email.contains($stdNum)"
       }
     }
   }
