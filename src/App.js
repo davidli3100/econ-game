@@ -7,7 +7,7 @@ import {
   Note,
 } from "@geist-ui/react";
 import firebase from "firebase";
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Quiz from "./Pages/Quiz";
 import "./App.css";
@@ -25,7 +25,9 @@ const firebaseConfig = {
   appId: "1:1063063138020:web:61cc687531fbc2682f06f1",
 };
 
-firebase.initializeApp(firebaseConfig);
+if (firebase.apps.length === 0) {
+  firebase.initializeApp(firebaseConfig);
+};
 
 function App() {
   const database = firebase.database();
@@ -80,8 +82,12 @@ function App() {
       <GeistProvider theme={{ type: "dark" }}>
         <CssBaseline />
         <div className="App">
-          <Text h2>Please Login to Play <Text i>The Invisible Hand</Text></Text>
-          <Note style={{ width: "fit-content", marginBottom: "24px" }}>You will need to use your PDSB.net account</Note>
+          <Text h2>
+            Please Login to Play <Text i>The Invisible Hand</Text>
+          </Text>
+          <Note style={{ width: "fit-content", marginBottom: "24px" }}>
+            You will need to use your PDSB.net account
+          </Note>
           <Button
             type="secondary"
             ghost
@@ -101,23 +107,26 @@ function App() {
       <div className="App">
         <Router>
           <Switch>
-          <Route path="/" exact>
-          {console.log(gameStatus)}
-            {loading ? (
-              <Loading />
-            ) : (
-              {
-                /* todo: redirect to waiting if user has answered question already */
-                waiting: <Text h2> Waiting for game to start...</Text>,
-                question: <Quiz questionID={questionID} />,
-                gameEnded: <Text h2>Game Ended</Text>,
-              }[gameStatus] || <Text h1>Something went wrong</Text>
-            )}
-          </Route>
-          <PrivateRoute authed={isAdmin()} path="/admin" component={Admin} />
+            <Route path="/" exact>
+              {console.log(gameStatus)}
+              {loading ? (
+                <Loading />
+              ) : (
+                {
+                  /* todo: redirect to waiting if user has answered question already */
+                  waiting: (
+                    <Loading className="loading" size="large">
+                      Waiting for game to start
+                    </Loading>
+                  ),
+                  question: <Quiz questionID={questionID} />,
+                  gameEnded: <Text h2>Game Ended</Text>,
+                }[gameStatus] || <Text h1>Something went wrong</Text>
+              )}
+            </Route>
+            <PrivateRoute authed={isAdmin()} path="/admin" component={Admin} />
           </Switch>
         </Router>
-        
       </div>
     </GeistProvider>
   );

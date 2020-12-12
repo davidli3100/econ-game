@@ -93,6 +93,22 @@
   padding-bottom: 8px;
 }
 
+.admin-table {
+  margin-top: 32px;
+}
+
+.questions-table-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.questions-table-title > h3 {
+  margin-bottom: 4px;
+  margin-right: 8px;
+}
+
 @media only screen and (max-width: 720px) {
   .button-grid {
     grid-template-columns: 1fr;
