@@ -7,7 +7,7 @@ const GameEnded = () => {
 
   useEffect(() => {
     const username = firebase.auth().currentUser.email.split("@")[0];
-    firebase.database().ref(`/users/${username}`).on("value", (snapshot) => {
+    firebase.database().ref(`/users/${username}`).once("value", (snapshot) => {
       setUser(snapshot.val());
     })
   }, []);
