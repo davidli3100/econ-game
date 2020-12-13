@@ -14,6 +14,7 @@ import "./App.css";
 import { isAdmin, setUser } from "./utils/auth";
 import PrivateRoute from "./Components/PrivateRoute";
 import Admin from "./Pages/Admin";
+import GameEnded from "./Pages/GameEnded"
 
 const firebaseConfig = {
   apiKey: "AIzaSyDN_i9crnVUhgOak4rGRCpAkrFtfWHWJh0",
@@ -120,7 +121,7 @@ function App() {
                     </Loading>
                   ),
                   question: <Quiz questionID={questionID} />,
-                  gameEnded: <Text h2>Game Ended</Text>,
+                  gameEnded: <GameEnded />,
                 }[gameStatus] || <Text h1>Something went wrong</Text>
               )}
             </Route>

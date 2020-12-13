@@ -208,7 +208,7 @@ const Admin = () => {
       </Text>
       <div className="admin-content">
         <div className="admin-quickstats">
-          <Stat stat={stats.score / numUsers} label="Societal Score" />
+          <Stat stat={(stats.score / numUsers).toFixed(2)} label="Average Societal Score" />
           <Stat
             stat={`$${(stats.cash / numUsers).toFixed(2)}`}
             label="Average Cash"
