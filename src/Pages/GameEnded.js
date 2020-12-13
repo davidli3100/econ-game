@@ -3,7 +3,7 @@ import firebase from "firebase";
 import { Card, Text } from "@geist-ui/react";
 
 const GameEnded = () => {
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState({score: 0, cash: 0});
 
   useEffect(() => {
     const username = firebase.auth().currentUser.email.split("@")[0];
