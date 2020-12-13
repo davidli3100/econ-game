@@ -50,7 +50,7 @@ const GameEnded = () => {
             Final Cash Balance
           </Text>
         </Text>
-        {user.score > 0 ? (
+        {user.cash > 0 ? (
           <Text>
             Good job! You were able to maximize the amount of money you earned in this simulation. Did your conscience feel good while doing so?
             Did you feel like you fulfilled your own moral values?
