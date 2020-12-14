@@ -131,9 +131,11 @@ function App() {
             <PrivateRoute authed={isAdmin()} path="/admin" component={Admin} />
           </Switch>
         </Router>
-        <footer>
-          <Text>Made with ☕ by David, Jason, and Claire</Text>
-        </footer>
+        {gameStatus === "question" && 
+                <footer>
+                <Text>Made with ☕ by David, Jason, and Claire</Text>
+              </footer>
+        }
       </div>
     </GeistProvider>
   );
