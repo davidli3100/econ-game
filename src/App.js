@@ -14,7 +14,7 @@ import "./App.css";
 import { isAdmin, setUser } from "./utils/auth";
 import PrivateRoute from "./Components/PrivateRoute";
 import Admin from "./Pages/Admin";
-import GameEnded from "./Pages/GameEnded"
+import GameEnded from "./Pages/GameEnded";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDN_i9crnVUhgOak4rGRCpAkrFtfWHWJh0",
@@ -28,7 +28,7 @@ const firebaseConfig = {
 
 if (firebase.apps.length === 0) {
   firebase.initializeApp(firebaseConfig);
-};
+}
 
 function App() {
   const database = firebase.database();
@@ -97,6 +97,9 @@ function App() {
           >
             Login
           </Button>
+          <footer>
+            <Text>Made with ☕ by David, Jason, and Claire</Text>
+          </footer>
         </div>
       </GeistProvider>
     );
@@ -128,6 +131,9 @@ function App() {
             <PrivateRoute authed={isAdmin()} path="/admin" component={Admin} />
           </Switch>
         </Router>
+        <footer>
+          <Text>Made with ☕ by David, Jason, and Claire</Text>
+        </footer>
       </div>
     </GeistProvider>
   );
